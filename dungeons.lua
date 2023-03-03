@@ -888,11 +888,11 @@ function talkToNpc(vid, text)
 
 			printQuestHeader(mob_name(npc.race))
 			center(string.format("%s", text))
-			wait()
 
 			npc.purge()
 			clearTalkToNpcStage()
 			setNextDungeonStageTimer()
+			return
 		end
 	end
 end
