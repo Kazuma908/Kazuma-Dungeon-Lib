@@ -70,7 +70,7 @@ quest dungeon_basic_test begin
 				}, "data/dungeon/basic_dungeon_kazuma/regen_stage_1.txt", true)
 			end
 		end	
-	
+
 		when kill with isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			local stage = getStage()
 			local race = npc.get_race()

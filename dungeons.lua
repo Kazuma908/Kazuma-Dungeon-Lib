@@ -22,8 +22,12 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 		local v = dungeon_cooldown_reset_item
 		local c = dungeon_cooldown_reset_item_count
 
-		if pc.count_item(v) >= c then
-			printQuestHeader(mob_name(npc.race))
+		if v == 0 then 
+			center(string.format("Du musst noch %s warten!", second_to_hms((getDungeonTimerFlag(dungeon_map_idx)-os.time()))))
+			cooldown_sucsess = false
+		end
+
+		if v > 0 and pc.count_item(v) >= c then
 			center(string.format("Du hast das %s dabei! Möchtest du es verwenden?", item_name(v)))
 			
 			local reduce_time = select(string.format("%s anwenden!", item_name(v)), "Abbrechen")
@@ -63,7 +67,7 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	elseif only_solo_modus == 1 then
 		d.new_jump(dungeon_map_idx, dungeon_local_x*100, dungeon_local_y*100)
 	end
-	
+
 	setBasePositions(dungeon_local_x, dungeon_local_y)
 	setDungeonMapIndex(dungeon_map_idx)
 	setDungeonCooldownTime(dungeon_cooldown, dungeon_map_idx)
@@ -171,9 +175,7 @@ function setDungeonMapIndex(idx)
 end
 
 function getDungeonMapIndex()
-	if d.is_available0() then
-		return d.get_map_index()
-	elseif party.is_party() then
+	if party.is_party() then
 		return party.getf("dungeonIndex")
 	else
 		return pc.getf("dungeon", "dungeonIndex")
@@ -184,24 +186,13 @@ function getDungeonBaseMapIndex()
 	return d.getf("base_map_index")
 end
 
-function isInDungeonRange(map_index)
-	return (pc.get_map_index() >= map_index * 10000) and (pc.get_map_index() < (map_index + 1) * 10000)
-end
-
-function isInDungeon(map_index)
-	if not pc.in_dungeon() then
-		return false
-	end
-
-	if pc.get_map_index() < 10000 then
-		return false
-	end
-
-	return isInDungeonRange(map_index or getDungeonBaseMapIndex())
-end
-
 function isInDungeonByMapIndex(map_index)
-	return isInDungeon(map_index)
+	local dungeon_map_index = getDungeonMapIndex()
+	d.notice(string.format("dungeon_map_index == %d", dungeon_map_index))
+
+	if dungeon_map_index != d.get_map_index() then return false end
+
+	return pc.get_map_index() >= (map_index * 10000) and pc.get_map_index() < ((map_index+1) * 10000)
 end
 
 function clearDungeon()
