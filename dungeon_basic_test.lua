@@ -109,10 +109,8 @@ quest dungeon_index_71 begin
 			end
 		end
 
-		when increaseStageTimer.timer begin
-			if isInDungeonByMapIndex(DUNGEON_INDEX) then
-				set_state("restart_stage")
-			end
+		when increaseStageTimer.timer with isInDungeonByMapIndex(DUNGEON_INDEX) begin
+			set_state("restart_stage")
 		end
 	end
 

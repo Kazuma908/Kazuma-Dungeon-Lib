@@ -8,13 +8,6 @@ quest dungeon_server_timer begin
 			end
 		end
 
-		when increaseDungeonStage.server_timer begin
-			if d.select(get_server_timer_arg()) then
-				updateDungeon()
-				dungeon_server_timer.clearDungeonServerTimer()
-			end
-		end
-
 		when failed_dungeon.server_timer begin
 			if d.select(get_server_timer_arg()) then
 				exitDungeon()
@@ -26,7 +19,6 @@ quest dungeon_server_timer begin
 		function clearDungeonServerTimer()
 			clear_server_timer("exit_dungeon", get_server_timer_arg())
 			clear_server_timer("failed_dungeon", get_server_timer_arg())
-			clear_server_timer("increaseDungeonStage", get_server_timer_arg())
 		end
 	end
 end
