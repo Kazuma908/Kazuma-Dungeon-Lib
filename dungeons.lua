@@ -10,8 +10,8 @@ DUNGEON_TYPE_KILL_RANDOM_BOSS = 8
 
 function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_local_y, dungeon_name, fail_time, entry_item, entry_item_count, only_solo_modus, dungeon_cooldown, dungeon_cooldown_reset_item, dungeon_cooldown_reset_item_count)
 	printQuestHeader(mob_name(npc.race))
-	
-	if pc.get_level() < min_level then
+
+	if min_level > pc.get_level() then
 		center(string.format("Du bist noch nicht Stark genug! Du musst Level %d erreicht haben!", min_level))
 		return
 	end
@@ -187,11 +187,6 @@ function getDungeonBaseMapIndex()
 end
 
 function isInDungeonByMapIndex(map_index)
-	local dungeon_map_index = getDungeonMapIndex()
-	d.notice(string.format("dungeon_map_index == %d", dungeon_map_index))
-
-	if dungeon_map_index != d.get_map_index() then return false end
-
 	return pc.get_map_index() >= (map_index * 10000) and pc.get_map_index() < ((map_index+1) * 10000)
 end
 
@@ -218,7 +213,7 @@ function setStage(val)
 end
 
 function setNextDungeonStageTimer()
-	setDungeonStageType(DUNGEON_TYPE_NONE)
+	setDungeonStageType(0)
 
 	if isDungeonEndFlag() then
 		d.notice("Du hast den Dungeon abgeschlossen. Du wirst in 20 Sekunden herrausteleportiert!")
@@ -228,6 +223,7 @@ function setNextDungeonStageTimer()
 	else
 		clearStage()
 		d.notice(string.format("Du hast die Ebene abgeschlossen. Die nächste Ebene startet in %d Sekunden!", 3))
+		incDungeonStage()
 		timer("increaseStageTimer", 3)
 	end
 end
@@ -242,7 +238,6 @@ function getBasePositions()
 end
 
 function setDungeonWarpLocation()
-	d.notice(string.format("set_warp_location = %d, %d, %d", getDungeonBaseMapIndex(), d.getf("base_x"), d.getf("base_y")))
 	d.set_warp_location(getDungeonBaseMapIndex(), d.getf("base_x"), d.getf("base_y"))
 	d.setf("dungeon_started", 1)
 end
@@ -681,9 +676,9 @@ function spawnKeystoneNpc(npc_table, item_table, regen_file, aggro, respawn)
 	printDungeonStageText(string.format("Finde %s und gebe es bei %s ab!", item_name(item_table.vnum), tableToEnumeratedString(npcNameTable)))
 
 	setMaxItemCount(table.getn(npc_table))
-	setItemDropChance(item_table.sucsess_chance)
+	setItemDropChance(item_table.drop_chance)
 	setDungeonItemVnum(item_table.vnum)
-	setKeystoneChance(item_table.drop_chance)
+	setKeystoneChance(item_table.sucsess_chance)
 
 	if canRespawn then
 		d.set_regen_file(regen_file, aggressiv)
@@ -697,10 +692,8 @@ end
 function spawnKeystoneNpcInWaves(item_table, npc_table, regen_file, aggressiv)
 	if getDungeonStageType() > DUNGEON_TYPE_NONE then return end
 
-	local item_vnum = item_table.i_vnum
-	local item_count = item_table.i_count
-	local item_drop_chance = item_table.i_chance
-	local item_sucsess_chance = item_table.i_sucsess_chance
+	local item_vnum = item_table.vnum
+	local item_count = item_table.count
 	local npcNamesTable = {}
 
 	for _, npc in ipairs(npc_table) do
@@ -716,9 +709,9 @@ function spawnKeystoneNpcInWaves(item_table, npc_table, regen_file, aggressiv)
 	setMonsterKeystoneMaxCount(d.count_monster()-5)
 
 	setMaxItemCount(table.getn(npc_table))
-	setItemDropChance(item_drop_chance)
+	setItemDropChance(item_table.drop_chance)
 	setDungeonItemVnum(item_vnum)
-	setKeystoneChance(item_sucsess_chance)
+	setKeystoneChance(item_table.sucsess_chance)
 	setDungeonStageType(DUNGEON_TYPE_KEYSTONE_IN_WAVES)
 
 	printDungeonStageText(string.format("Finde %s und gebe es bei %s ab!", item_name(item_vnum), tableToEnumeratedString(npcNamesTable)))
@@ -759,11 +752,37 @@ function stageKeystoneInWaves(regen)
 end
 
 function stageDropKeystoneItem()
-	if getDungeonStageType() == DUNGEON_TYPE_KEYSTONE or getDungeonStageType() == DUNGEON_TYPE_KEYSTONE_IN_WAVES then
+	if getDungeonStageType() == DUNGEON_TYPE_KEYSTONE then
 		increaseMonsterKeystoneCount()
 		local rand = number(1, 100)
+		local sucsess = false
+
+		if getItemDropChance() >= rand then
+			sucsess = true
+		end
 		
-		if (getMonsterKeystoneCount() >= getMonsterKeystoneMaxCount()) or (getItemDropChance() >= rand) then
+		if sucsess then
+			printDungeonStageText(string.format("%s wurde gefunden!", item_name(getDungeonItemVnum())))
+			local c = getDungeonItemDropCount() or 1
+
+			setMonsterKeystoneCount(0)
+			game.drop_item(getDungeonItemVnum(), c)
+		end
+	end
+end
+
+
+function stageDropKeystoneItemInWaves()
+	if getDungeonStageType() == DUNGEON_TYPE_KEYSTONE_IN_WAVES then
+		increaseMonsterKeystoneCount()
+		local rand = number(1, 100)
+		local sucsess = false
+
+		if (getMonsterKeystoneCount() >= getMonsterKeystoneMaxCount()) then
+			sucsess = true
+		end
+
+		if sucsess then
 			printDungeonStageText(string.format("%s wurde gefunden!", item_name(getDungeonItemVnum())))
 			local c = getDungeonItemDropCount() or 1
 

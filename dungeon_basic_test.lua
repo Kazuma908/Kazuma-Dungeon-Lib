@@ -7,10 +7,10 @@ define STAGE_5_NPC 20370
 define DUNGEON_ENTRY_POS_X 7039
 define DUNGEON_ENTRY_POS_Y 4630
 
-quest dungeon_basic_test begin
+quest dungeon_index_71 begin
 	state start begin
-		when DUNGEON_NPC.chat."Kazumas Dungeon" begin
-			selectDungeon(99, DUNGEON_INDEX, DUNGEON_ENTRY_POS_X, DUNGEON_ENTRY_POS_Y, "Kazumas Dungeon", 60*60, NO_ENTRY_ITEM, NO_ENTRY_ITEM, 1, 60*5, 30006, 1)
+		when DUNGEON_NPC.chat."Spinnen Dungeon" begin
+			selectDungeon(99, DUNGEON_INDEX, DUNGEON_ENTRY_POS_X, DUNGEON_ENTRY_POS_Y, "Spinnen Dungeon", 60*60, NO_ENTRY_ITEM, NO_ENTRY_ITEM, 1, 0, 0, 0)
 		end
 
 		-- START for testing!
@@ -44,7 +44,7 @@ quest dungeon_basic_test begin
 				})
 	
 			elseif stage == 1 then
-				spawnMonsters("data/dungeon/basic_dungeon_kazuma/regen_stage_1.txt", 10)
+				spawnMonsters("data/dungeon/basic_dungeon_kazuma/regen_stage_1.txt", 30)
 	
 			elseif stage == 2 then
 				spawnBoss({
@@ -58,7 +58,7 @@ quest dungeon_basic_test begin
 				})
 	
 			elseif stage == 4 then
-				spawnKeystoneNpc({{vnum = STAGE_4_PILLAR_NPC, x = 387, y = 374}}, {vnum = 30007, sucsess_chance = 75, drop_chance = 10}, "data/dungeon/basic_dungeon_kazuma/regen_stage_1.txt", true, true)
+				spawnKeystoneNpc({{vnum = STAGE_4_PILLAR_NPC, x = 387, y = 374}}, {vnum = 30007, sucsess_chance = 75, drop_chance = 1}, "data/dungeon/basic_dungeon_kazuma/regen_stage_1.txt", true, true)
 	
 			elseif stage == 5 then
 				spawnNpcInDungeon({vnum = STAGE_5_NPC, x = 387, y = 374})
@@ -110,8 +110,9 @@ quest dungeon_basic_test begin
 		end
 
 		when increaseStageTimer.timer begin
-			incDungeonStage()
-			set_state("restart_stage")
+			if isInDungeonByMapIndex(DUNGEON_INDEX) then
+				set_state("restart_stage")
+			end
 		end
 	end
 
