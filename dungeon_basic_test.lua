@@ -6,6 +6,8 @@ define STAGE_4_PILLAR_NPC 20361
 define STAGE_5_NPC 20370
 define DUNGEON_ENTRY_POS_X 7039
 define DUNGEON_ENTRY_POS_Y 4630
+define STAGE_1_WARP_X 7124
+define STAGE_1_WARP_Y 4727
 
 quest dungeon_index_71 begin
 	state start begin
@@ -116,6 +118,12 @@ quest dungeon_index_71 begin
 
 	state restart_stage begin
 		when enter or login begin
+			local stage = getStage()
+
+			if stage == 1 then
+				d.jump_all(STAGE_1_WARP_X, STAGE_1_WARP_Y)
+			end
+
 			restart_quest()
 		end
 	end
