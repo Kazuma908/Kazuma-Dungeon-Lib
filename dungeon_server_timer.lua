@@ -2,7 +2,6 @@ quest dungeon_server_timer begin
 	state start begin
 		when dungeonExitTimer.server_timer begin
 			if d.select(get_server_timer_arg()) then
-				d.notice("DungeonExitTimer Start")
 				exitDungeon()
 				dungeon_server_timer.clearDungeonServerTimer()
 			end

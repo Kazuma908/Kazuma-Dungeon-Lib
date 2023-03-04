@@ -31,9 +31,8 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 			center(string.format("Du hast das %s dabei! Möchtest du es verwenden?", item_name(v)))
 			
 			local reduce_time = select(string.format("%s anwenden!", item_name(v)), "Abbrechen")
-			if reduce_time == 2 then 
-				cooldown_sucsess = false 
-			end
+			if reduce_time == 2 then cooldown_sucsess = false end
+
 			pc.remove_item(v, c)
 			resetDungeonTimerFlag(dungeon_map_idx)
 		else
@@ -45,13 +44,13 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	if not cooldown_sucsess then return end
 
 	center(string.format("Möchstest du %s bereten?", dungeon_name))
-	
+
 	local s = select("Eintreten!", "Abbrechen")
 	if s == 2 then return end
-	
+
 	if not checkEntryMember(min_level, npc.race) then return end
 	if not checkEntryItems(entry_item, entry_item_count, entry_npc) then return end
-	
+
 	if only_solo_modus == 0 then
 		if party.is_party() then
 			if party.is_leader() then
@@ -76,8 +75,6 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	if fail_time > 0 then
 		server_timer("failed_dungeon", fail_time, d.get_map_index())
 	end
-
-	d.set_warp_location( dungeon_map_idx, dungeon_local_x*100, dungeon_local_y*100 )
 end
 
 function checkEntryMember(min_level, entry_npc)
@@ -238,8 +235,20 @@ function getBasePositions()
 	return getDungeonBaseMapIndex(), d.getf("base_x"), d.getf("base_y")
 end
 
+function get_village_informations_by_empire()
+	local tab = {
+		[1] = {1, 4693, 9642},
+		[2] = {21, 557, 1579},
+		[3] = {41, 9696, 2784},
+	}
+	return tab[pc.get_empire()]
+end
+
 function setDungeonWarpLocation()
-	d.set_warp_location(getDungeonBaseMapIndex(), d.getf("base_x"), d.getf("base_y"))
+	local i = get_village_informations_by_empire()
+	local index, base_x, base_y = i[1], i[2], i[3]
+
+	d.set_warp_location(index, base_x, base_y)
 	d.setf("dungeon_started", 1)
 end
 

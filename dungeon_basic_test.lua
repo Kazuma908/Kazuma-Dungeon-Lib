@@ -95,7 +95,7 @@ quest dungeon_index_71 begin
 
 		when STAGE_4_PILLAR_NPC.take with item.vnum == getDungeonItemVnum() and isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			local stage = getStage()
-			
+
 			if stage == 4 then
 				stageKeystoneWithItem()
 			end
@@ -103,7 +103,7 @@ quest dungeon_index_71 begin
 
 		when STAGE_5_NPC.click with isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			local stage = getStage()
-			
+
 			if stage == 5 then
 				talkToNpc(npc.get_vid(), "Hallo! Hier kommt ein Text rein, welche irgendeinen Sinn hat!")
 			end
