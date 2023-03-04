@@ -68,6 +68,7 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 		d.new_jump(dungeon_map_idx, dungeon_local_x*100, dungeon_local_y*100)
 	end
 
+	pc.remove_item(entry_item, entry_item_count)
 	setBasePositions(dungeon_local_x, dungeon_local_y)
 	setDungeonMapIndex(dungeon_map_idx)
 	setDungeonCooldownTime(dungeon_cooldown, dungeon_map_idx)
