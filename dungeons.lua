@@ -73,7 +73,7 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	setDungeonCooldownTime(dungeon_cooldown, dungeon_map_idx)
 
 	if fail_time > 0 then
-		server_timer("failed_dungeon", fail_time, d.get_map_index())
+		server_timer("failed_dungeon", fail_time, getDungeonMapIndex())
 	end
 end
 
@@ -185,8 +185,25 @@ function getDungeonBaseMapIndex()
 end
 
 function isInDungeonByMapIndex(map_index)
-	return pc.get_map_index() >= (map_index * 10000) and pc.get_map_index() < ((map_index+1) * 10000)
+	if pc.get_map_index() < 10000 then
+		return false
+	end
+
+	if not pc.in_dungeon() then
+		return false
+	end
+
+	if pc.in_dungeon() and not d.getf("base_map_index") == map_index then
+		return false
+	end
+
+	return isInDungeonRange(map_index)
 end
+
+function isInDungeonRange(map_index)
+	return (pc.get_map_index() >= map_index * 10000) and (pc.get_map_index() < (map_index + 1) * 10000)
+end
+
 
 function clearDungeon()
 	d.setf("stage", 0)
@@ -217,7 +234,7 @@ function setNextDungeonStageTimer()
 		d.notice("Du hast den Dungeon abgeschlossen. Du wirst in 20 Sekunden herrausteleportiert!")
 		clearDungeon()
 
-		server_timer("dungeonExitTimer", 20, d.get_map_index())
+		server_timer("dungeonExitTimer", 20, getDungeonMapIndex())
 	else
 		clearStage()
 		d.notice(string.format("Du hast die Ebene abgeschlossen. Die nächste Ebene startet in %d Sekunden!", 3))

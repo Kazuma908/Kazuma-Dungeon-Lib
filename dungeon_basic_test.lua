@@ -33,7 +33,7 @@ quest dungeon_index_71 begin
 		end
 		-- END for testing!
 
-		when login or enter with isPartyLeaderOrSolo() and isInDungeonByMapIndex(DUNGEON_INDEX) begin
+		when login or enter with isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			local stage = getStage()
 	
 			if stage == 0 then
@@ -118,10 +118,11 @@ quest dungeon_index_71 begin
 
 	state restart_stage begin
 		when enter or login begin
-			local stage = getStage()
-
-			if stage == 1 then
-				d.jump_all(STAGE_1_WARP_X, STAGE_1_WARP_Y)
+			if isInDungeonByMapIndex(DUNGEON_INDEX)
+				local stage = getStage()
+				if stage == 1 then
+					d.jump_all(STAGE_1_WARP_X, STAGE_1_WARP_Y)
+				end
 			end
 
 			restart_quest()
