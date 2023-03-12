@@ -12,7 +12,7 @@ define STAGE_1_WARP_Y 4727
 quest dungeon_index_71 begin
 	state start begin
 		when DUNGEON_NPC.chat."Spinnen Dungeon" begin
-			selectDungeon(99, DUNGEON_INDEX, DUNGEON_ENTRY_POS_X, DUNGEON_ENTRY_POS_Y, "Spinnen Dungeon", 60*60, NO_ENTRY_ITEM, NO_ENTRY_ITEM, 0, 0, 0, 0)
+			selectDungeon(99, DUNGEON_INDEX, DUNGEON_ENTRY_POS_X, DUNGEON_ENTRY_POS_Y, "Spinnen Dungeon", 60*60, NO_ENTRY_ITEM, NO_ENTRY_ITEM, 1, 0, 0, 0)
 		end
 
 		-- START for testing!
@@ -35,9 +35,10 @@ quest dungeon_index_71 begin
 
 		when login or enter with isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			local stage = getStage()
-
+	
 			if stage == 0 then
 				setDungeonWarpLocation()
+	
 				spawnMetinstone({
 					{vnum = 8001, x = 387, y = 316}, 
 					{vnum = 8002, x = 387, y = 352}, 
@@ -110,17 +111,18 @@ quest dungeon_index_71 begin
 			end
 		end
 
-		when increaseStageTimer_71.timer with isInDungeonByMapIndex(DUNGEON_INDEX) begin
+		when increaseStageTimer.timer with isInDungeonByMapIndex(DUNGEON_INDEX) begin
 			set_state("restart_stage")
 		end
 	end
 
 	state restart_stage begin
 		when enter or login begin
-			local stage = getStage()
-
-			if stage == 1 then
-				d.jump_all(STAGE_1_WARP_X, STAGE_1_WARP_Y)
+			if isInDungeonByMapIndex(DUNGEON_INDEX)
+				local stage = getStage()
+				if stage == 1 then
+					d.jump_all(STAGE_1_WARP_X, STAGE_1_WARP_Y)
+				end
 			end
 
 			set_state("start")

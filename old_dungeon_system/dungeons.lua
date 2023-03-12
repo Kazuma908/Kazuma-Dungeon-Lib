@@ -7,6 +7,7 @@ DUNGEON_TYPE_TALK_TO_NPC = 5
 DUNGEON_TYPE_KEYSTONE_IN_WAVES = 6
 DUNGEON_TYPE_FIND_REAL_METINSTONE = 7
 DUNGEON_TYPE_KILL_RANDOM_BOSS = 8
+DUNGEON_TYPE_KEY_DROP = 9
 
 function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_local_y, dungeon_name, fail_time, entry_item, entry_item_count, only_solo_modus, dungeon_cooldown, dungeon_cooldown_reset_item, dungeon_cooldown_reset_item_count)
 	printQuestHeader(mob_name(npc.race))
@@ -71,15 +72,10 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	setBasePositions(dungeon_local_x, dungeon_local_y)
 	setDungeonMapIndex(dungeon_map_idx)
 	setDungeonCooldownTime(dungeon_cooldown, dungeon_map_idx)
-	d.setf("leader_vid", pc.get_vid())
 
 	if fail_time > 0 then
 		server_timer("failed_dungeon", fail_time, getDungeonMapIndex())
 	end
-end
-
-function getLeaderVid()
-	return d.getf("leader_vid")
 end
 
 function checkEntryMember(min_level, entry_npc)
@@ -242,9 +238,9 @@ function setNextDungeonStageTimer()
 		server_timer("dungeonExitTimer", 20, getDungeonMapIndex())
 	else
 		clearStage()
-		incDungeonStage()
 		d.notice(string.format("Du hast die Ebene abgeschlossen. Die nächste Ebene startet in %d Sekunden!", 3))
-		timer(string.format("increaseStageTimer_%d", getDungeonBaseMapIndex()), 3)
+		incDungeonStage()
+		timer("increaseStageTimer", 3)
 	end
 end
 
@@ -684,6 +680,54 @@ end
 
 function getMonsterKeystoneMaxCount()
 	return d.getf("dungeon_keystone_max_mob_count")
+end
+
+function spawnKeystoneMonsters(item_table, regen_file, aggro, respawn)
+	if getDungeonStageType() > DUNGEON_TYPE_NONE then return end
+
+	local aggressiv = aggro or false
+	local respawn = respawn or false
+
+	printDungeonStageText(string.format("Finde %s und nutze ihm!", item_name(item_table.vnum)))
+
+	setItemDropChance(item_table.drop_chance)
+	setDungeonItemVnum(item_table.vnum)
+	setKeystoneChance(item_table.sucsess_chance)
+
+	if canRespawn then
+		d.set_regen_file(regen_file, aggressiv)
+	else
+		d.regen_file(regen_file, aggressiv)
+	end
+
+	setDungeonStageType(DUNGEON_TYPE_KEY_DROP)
+end
+
+function stageUseKeystoneItem(regen)
+	if getDungeonStageType() == DUNGEON_TYPE_KEY_DROP then
+		if number(1, 100) <= getKeystoneChance() then
+			increaseKeystoneCount()
+			pc.remove_item(getDungeonItemVnum(), 1)
+			clearStage()
+
+			if getKeystoneCount() == getMaxItemCount() then
+				clearKeystoneStage()
+				setNextDungeonStageTimer()
+			else
+				printDungeonStageText(string.format("Es fehlen noch %d x %s!", (getMaxItemCount()-getKeystoneCount()), item_name(getDungeonItemVnum())))
+				d.regen_file(regen)
+			end
+		end
+	end
+end
+
+function stageDropKeystoneItemForUse()
+	if getDungeonStageType() == DUNGEON_TYPE_KEY_DROP then
+		if getItemDropChance() >= number(1, 100) then
+			printDungeonStageText(string.format("%s wurde gefunden!", item_name(getDungeonItemVnum())))
+			game.drop_item(getDungeonItemVnum(), 1)
+		end
+	end
 end
 
 function spawnKeystoneNpc(npc_table, item_table, regen_file, aggro, respawn)
