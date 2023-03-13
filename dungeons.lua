@@ -8,6 +8,47 @@ DUNGEON_TYPE_KEYSTONE_IN_WAVES = 6
 DUNGEON_TYPE_FIND_REAL_METINSTONE = 7
 DUNGEON_TYPE_KILL_RANDOM_BOSS = 8
 
+function selectDungeonWithItem(entry_item)
+	local settings = getDungeonItemSettings(entry_item)
+	if not settings then return end
+	
+	local min_level = settings.level
+	local dungeon_map_idx = settings.index
+	local dungeon_local_x = settings.local_x
+	local dungeon_local_y = settings.local_y
+
+	printQuestHeader(mob_name(npc.race))
+
+	if min_level > pc.get_level() then
+		center(string.format("Du bist noch nicht Stark genug! Du musst Level %d erreicht haben!", min_level))
+		return
+	end
+
+	center(string.format("Möchstest du %s bereten?", dungeon_name))
+
+	local s = select("Eintreten!", "Abbrechen")
+	if s == 2 then return end
+
+	if not checkEntryMember(min_level, npc.race) then return end
+
+	if party.is_party() then
+		if party.is_leader() then
+			d.new_jump_party(dungeon_map_idx, dungeon_local_x, dungeon_local_y)
+		else
+			printQuestHeader(mob_name(npc.race))
+			center("Bitte lass mich mit deinem Gruppenanführer sprechen!")
+			return
+		end
+	else
+		d.new_jump(dungeon_map_idx, dungeon_local_x*100, dungeon_local_y*100)
+	end
+
+	pc.remove_item(entry_item, 1)
+	setBasePositions(dungeon_local_x, dungeon_local_y)
+	setDungeonMapIndex(dungeon_map_idx)
+	server_timer("failed_dungeon", fail_time, getDungeonMapIndex())
+end
+
 function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_local_y, dungeon_name, fail_time, entry_item, entry_item_count, only_solo_modus, dungeon_cooldown, dungeon_cooldown_reset_item, dungeon_cooldown_reset_item_count)
 	printQuestHeader(mob_name(npc.race))
 
@@ -49,7 +90,7 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	if s == 2 then return end
 
 	if not checkEntryMember(min_level, npc.race) then return end
-	if not checkEntryItems(entry_item, entry_item_count, entry_npc) then return end
+	if not checkEntryItems(entry_item, entry_item_count, npc.race) then return end
 
 	if only_solo_modus == 0 then
 		if party.is_party() then
@@ -71,7 +112,6 @@ function selectDungeon(min_level, dungeon_map_idx, dungeon_local_x, dungeon_loca
 	setBasePositions(dungeon_local_x, dungeon_local_y)
 	setDungeonMapIndex(dungeon_map_idx)
 	setDungeonCooldownTime(dungeon_cooldown, dungeon_map_idx)
-	d.setf("leader_vid", pc.get_vid())
 
 	if fail_time > 0 then
 		server_timer("failed_dungeon", fail_time, getDungeonMapIndex())
