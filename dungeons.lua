@@ -16,6 +16,7 @@ function selectDungeonWithItem(entry_item)
 	local dungeon_map_idx = settings.index
 	local dungeon_local_x = settings.local_x
 	local dungeon_local_y = settings.local_y
+	local dungeon_name = settings.name
 
 	printQuestHeader(mob_name(npc.race))
 

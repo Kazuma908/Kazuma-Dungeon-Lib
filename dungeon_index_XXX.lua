@@ -7,7 +7,7 @@ define DUNGEON_MIN_LEVEL 99
 
 quest dungeon_index_XXX begin
 	state start begin
-		when DUNGEON_NPC.take with isDungeonEntryItem(item.vnum, DUNGEON_INDEX) begin
+		when DUNGEON_NPC.take with isDungeonEntryItem(item.get_vnum(), DUNGEON_INDEX) begin
 			selectDungeonWithItem(item.get_vnum())
 		end
 
