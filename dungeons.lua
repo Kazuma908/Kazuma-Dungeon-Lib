@@ -150,6 +150,8 @@ function checkEntryMember(min_level, entry_npc)
 		if table.getn(cancelLevelUsers) == 0 then
 			return true
 		end
+	else
+		return true
 	end
 end
 
