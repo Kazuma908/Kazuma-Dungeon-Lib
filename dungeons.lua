@@ -124,30 +124,32 @@ function getLeaderVid()
 end
 
 function checkEntryMember(min_level, entry_npc)
-	local cancelLevelUsers = {}
-	local pids = {party.get_member_pids()}
-
-	for i = 1, table.getn(pids), 1 do
-		q.begin_other_pc_block(pids[i])
-		if pc.get_level() < min_level then
-			table.insert(cancelLevelUsers, table.getn(cancelLevelUsers)+1, pc.get_name())
+	if party.is_party() then
+		local cancelLevelUsers = {}
+		local pids = {party.get_member_pids()}
+	
+		for i = 1, table.getn(pids), 1 do
+			q.begin_other_pc_block(pids[i])
+			if pc.get_level() < min_level then
+				table.insert(cancelLevelUsers, table.getn(cancelLevelUsers)+1, pc.get_name())
+			end
+			q.end_other_pc_block()
 		end
-		q.end_other_pc_block()
-	end
-
-	if table.getn(cancelLevelUsers) >= 1 then
-		center_title(mob_name(entry_npc))
-		center(string.format("Einer deiner Gruppenmitglieder ist nicht Level %d!", min_level))
-		
-		for x = 1, table.getn(cancelLevelUsers), 1 do
-			center(string.format("- %s", cancelLevelUsers[x]), true)
+	
+		if table.getn(cancelLevelUsers) >= 1 then
+			center_title(mob_name(entry_npc))
+			center(string.format("Einer deiner Gruppenmitglieder ist nicht Level %d!", min_level))
+			
+			for x = 1, table.getn(cancelLevelUsers), 1 do
+				center(string.format("- %s", cancelLevelUsers[x]), true)
+			end
+	
+			return false
 		end
-
-		return false
-	end
-
-	if table.getn(cancelLevelUsers) == 0 then
-		return true
+	
+		if table.getn(cancelLevelUsers) == 0 then
+			return true
+		end
 	end
 end
 
